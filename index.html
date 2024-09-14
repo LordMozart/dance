@@ -8,12 +8,13 @@
         html, body {
             height: 100%;
             margin: 0;
-            overflow: hidden;
-            position: relative;
-            background: #1c1c1c;
+            overflow: hidden; /* Prevent scrollbars */
+            position: relative; /* For positioning the GIF and counter */
+            background: #1c1c1c; /* Default background color */
             color: white;
         }
 
+        /* Hidden elements */
         .hidden {
             display: none;
         }
@@ -22,7 +23,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); /* Center the button */
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
@@ -30,7 +31,11 @@
             font-size: 1.2em;
             border-radius: 8px;
             cursor: pointer;
-            z-index: 10;
+            z-index: 10; /* Ensure the button is above other content */
+        }
+
+        body.show-content .centered-button {
+            display: none;
         }
 
         body.show-content {
@@ -42,8 +47,8 @@
                 blue, 
                 indigo, 
                 violet);
-            background-size: 600% 600%;
-            animation: rainbow 10s ease infinite;
+            background-size: 600% 600%; /* Size of the gradient */
+            animation: rainbow 10s ease infinite; /* Animation for the rainbow effect */
         }
 
         @keyframes rainbow {
@@ -56,62 +61,25 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
+            transform: translate(-50%, -50%); /* Center the GIF */
+            z-index: 1; /* Ensure the GIF is on top of the background */
         }
 
         .counter {
             position: absolute;
-            top: 20px;
+            top: 20px; /* Distance from the top */
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%); /* Center horizontally */
             color: white;
             font-size: 1.2em;
-            z-index: 2;
-            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2; /* Ensure it is above the background */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for readability */
             padding: 10px;
             border-radius: 8px;
             text-align: center;
         }
 
-        .leaderboard {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 250px;
-            color: white;
-            font-size: 1em;
-            z-index: 2;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .leaderboard ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .leaderboard li {
-            margin-bottom: 5px;
-        }
-
-        .reset-button {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1em;
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 10;
-        }
-
+        /* Hide audio controls */
         audio {
             display: none;
         }
@@ -135,22 +103,8 @@
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
         <span id="minutes">0</span> <span id="minute-label">minutes</span> 
-        <span id="seconds">0</span> <span id="second-label">seconds</span>
+        <span id="seconds">0</span> seconds
     </div>
-
-    <div class="leaderboard hidden" id="leaderboard">
-        <h2>Leaderboard</h2>
-        <ul id="leaderboard-list">
-            <!-- Leaderboard entries will be inserted here -->
-        </ul>
-    </div>
-
-    <!-- Reset Button -->
-    <button class="reset-button hidden" id="reset-button">Reset Leaderboard</button>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -158,27 +112,8 @@
             const body = document.body;
             const gif = document.querySelector('.centered-gif');
             const counter = document.getElementById('counter');
-            const leaderboard = document.getElementById('leaderboard');
-            const leaderboardList = document.getElementById('leaderboard-list');
-            const resetButton = document.getElementById('reset-button');
-            let startTime;
-            
-            // Firebase configuration
-            const firebaseConfig = {
-                apiKey: "YOUR_CalculatorKEY",
-                authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-                databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-                projectId: "YOUR_PROJECT_ID",
-                storageBucket: "YOUR_PROJECT_ID.appspot.com",
-                messagingSenderId: "YOUR_MESSCalculatorG_SENDER_ID",
-                appId: "YOUR_APP_ID"
-            };
+            const startTime = new Date();
 
-            // Initialize Firebase
-            const app = firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
-
-            // Function to format time
             function formatTime(ms) {
                 const seconds = Math.floor(ms / 1000);
                 const days = Math.floor(seconds / 86400);
@@ -193,7 +128,6 @@
                 };
             }
 
-            // Update the counter
             function updateCounter() {
                 const now = new Date();
                 const elapsed = now - startTime; // Time in milliseconds
@@ -204,88 +138,28 @@
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
 
-                // Show or hide labels based on the values
-                document.getElementById('day-label').style.display = days > 0 ? 'inline' : 'none';
-                document.getElementById('hour-label').style.display = hours > 0 || days > 0 ? 'inline' : 'none';
-                document.getElementById('minute-label').style.display = minutes > 0 || hours > 0 || days > 0 ? 'inline' : 'none';
-                document.getElementById('second-label').style.display = true; // Always show seconds
+                document.getElementById('day-label').textContent = days === 1 ? 'day' : 'days';
+                document.getElementById('hour-label').textContent = hours === 1 ? 'hour' : 'hours';
+                document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
             }
 
-            // Show content function
             function showContent() {
+                // Start playing audio
                 const audio = document.getElementById('background-music');
                 audio.play();
                 
+                // Reveal content
                 gif.classList.remove('hidden');
                 counter.classList.remove('hidden');
-                leaderboard.classList.remove('hidden');
-                resetButton.classList.remove('hidden');
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
 
-                // Set start time and update the counter every second
-                startTime = new Date();
+                // Update the counter every second
                 setInterval(updateCounter, 1000);
-
-                // Submit the current session's time to Firebase after 5 seconds
-                setTimeout(() => {
-                    const elapsedTime = Math.floor((new Date() - startTime) / 1000); // in seconds
-                    submitLeaderboard(elapsedTime);
-                }, 5000);
             }
 
-            // Submit leaderboard data to Firebase
-            function submitLeaderboard(timeOnPage) {
-                const newEntry = database.ref('leaderboard').push();
-                newEntry.set({
-                    time: timeOnPage
-                }).then(() => {
-                    updateLeaderboard();
-                });
-            }
-
-            // Retrieve leaderboard data from Firebase
-            function updateLeaderboard() {
-                database.ref('leaderboard').orderByChild('time').limitToLast(3).once('value', (snapshot) => {
-                    leaderboardList.innerHTML = '';
-                    const leaderboardData = [];
-                    snapshot.forEach((childSnapshot) => {
-                        leaderboardData.unshift(childSnapshot.val());
-                    });
-
-                    leaderboardData.forEach((entry, index) => {
-                        const listItem = document.createElement('li');
-                        const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
-                        let timeString = `${seconds} seconds`;
-
-                        if (minutes > 0 || hours > 0 || days > 0) {
-                            timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                        }
-                        if (hours > 0 || days > 0) {
-                            timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                        }
-                        if (days > 0) {
-                            timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                        }
-
-                        listItem.textContent = `${index + 1}. ${timeString}`;
-                        leaderboardList.appendChild(listItem);
-                    });
-                });
-            }
-
-            // Show content on button click
+            // Set up button click event
             startButton.addEventListener('click', showContent);
-
-            // Reset leaderboard
-            resetButton.addEventListener('click', () => {
-                database.ref('leaderboard').remove().then(() => {
-                    updateLeaderboard();
-                });
-            });
-
-            // Update leaderboard on page load
-            updateLeaderboard();
         });
     </script>
 </body>
