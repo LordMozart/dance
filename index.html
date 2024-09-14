@@ -1,1 +1,39 @@
-<div class="banana"></div>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainbow Background</title>
+<div class="banana"></div>  
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        body {
+            background: linear-gradient(45deg, 
+                red, 
+                orange, 
+                yellow, 
+                green, 
+                blue, 
+                indigo, 
+                violet);
+            background-size: 600% 600%; /* Size of the gradient */
+            animation: rainbow 10s ease infinite; /* Animation for the rainbow effect */
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+    </style>
+</head>
+<body>
+</body>
+</html>
