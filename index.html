@@ -98,6 +98,20 @@
             margin-bottom: 5px;
         }
 
+        .reset-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
         audio {
             display: none;
         }
@@ -121,7 +135,7 @@
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
         <span id="minutes">0</span> <span id="minute-label">minutes</span> 
-        <span id="seconds">0</span> seconds
+        <span id="seconds">0</span> <span id="second-label">seconds</span>
     </div>
 
     <div class="leaderboard hidden" id="leaderboard">
@@ -131,8 +145,13 @@
         </ul>
     </div>
 
-    <!-- Removed Reset Button -->
-    
+    <!-- Reset Button -->
+    <button class="reset-button hidden" id="reset-button">Reset Leaderboard</button>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
@@ -141,7 +160,23 @@
             const counter = document.getElementById('counter');
             const leaderboard = document.getElementById('leaderboard');
             const leaderboardList = document.getElementById('leaderboard-list');
-            const startTime = new Date();
+            const resetButton = document.getElementById('reset-button');
+            let startTime;
+            
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "YOUR_CalculatorKEY",
+                authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+                databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_PROJECT_ID.appspot.com",
+                messagingSenderId: "YOUR_MESSCalculatorG_SENDER_ID",
+                appId: "YOUR_APP_ID"
+            };
+
+            // Initialize Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
 
             // Function to format time
             function formatTime(ms) {
@@ -169,13 +204,11 @@
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
 
-                document.getElementById('day-label').textContent = days === 1 ? 'day' : 'days';
-                document.getElementById('hour-label').textContent = hours === 1 ? 'hour' : 'hours';
-                document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
-
+                // Show or hide labels based on the values
                 document.getElementById('day-label').style.display = days > 0 ? 'inline' : 'none';
-                document.getElementById('hour-label').style.display = hours > 0 ? 'inline' : 'none';
-                document.getElementById('minute-label').style.display = minutes > 0 || seconds > 0 ? 'inline' : 'none';
+                document.getElementById('hour-label').style.display = hours > 0 || days > 0 ? 'inline' : 'none';
+                document.getElementById('minute-label').style.display = minutes > 0 || hours > 0 || days > 0 ? 'inline' : 'none';
+                document.getElementById('second-label').style.display = true; // Always show seconds
             }
 
             // Show content function
@@ -186,45 +219,70 @@
                 gif.classList.remove('hidden');
                 counter.classList.remove('hidden');
                 leaderboard.classList.remove('hidden');
+                resetButton.classList.remove('hidden');
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
 
-                // Update the counter every second
+                // Set start time and update the counter every second
+                startTime = new Date();
                 setInterval(updateCounter, 1000);
 
-                // Save start time
-                localStorage.setItem('startTime', new Date().toISOString());
+                // Submit the current session's time to Firebase after 5 seconds
+                setTimeout(() => {
+                    const elapsedTime = Math.floor((new Date() - startTime) / 1000); // in seconds
+                    submitLeaderboard(elapsedTime);
+                }, 5000);
             }
 
-            // Update leaderboard
+            // Submit leaderboard data to Firebase
+            function submitLeaderboard(timeOnPage) {
+                const newEntry = database.ref('leaderboard').push();
+                newEntry.set({
+                    time: timeOnPage
+                }).then(() => {
+                    updateLeaderboard();
+                });
+            }
+
+            // Retrieve leaderboard data from Firebase
             function updateLeaderboard() {
-                fetch('/leaderboard')
-                    .then(response => response.json())
-                    .then(leaderboardData => {
-                        leaderboardList.innerHTML = '';
-                        leaderboardData.forEach((entry, index) => {
-                            const listItem = document.createElement('li');
-                            const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
-                            let timeString = `${seconds} seconds`;
-
-                            if (minutes > 0 || hours > 0 || days > 0) {
-                                timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                            }
-                            if (hours > 0 || days > 0) {
-                                timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                            }
-                            if (days > 0) {
-                                timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                            }
-
-                            listItem.textContent = `${index + 1}. ${timeString}`;
-                            leaderboardList.appendChild(listItem);
-                        });
+                database.ref('leaderboard').orderByChild('time').limitToLast(3).once('value', (snapshot) => {
+                    leaderboardList.innerHTML = '';
+                    const leaderboardData = [];
+                    snapshot.forEach((childSnapshot) => {
+                        leaderboardData.unshift(childSnapshot.val());
                     });
+
+                    leaderboardData.forEach((entry, index) => {
+                        const listItem = document.createElement('li');
+                        const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
+                        let timeString = `${seconds} seconds`;
+
+                        if (minutes > 0 || hours > 0 || days > 0) {
+                            timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        }
+                        if (hours > 0 || days > 0) {
+                            timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        }
+                        if (days > 0) {
+                            timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        }
+
+                        listItem.textContent = `${index + 1}. ${timeString}`;
+                        leaderboardList.appendChild(listItem);
+                    });
+                });
             }
 
             // Show content on button click
             startButton.addEventListener('click', showContent);
+
+            // Reset leaderboard
+            resetButton.addEventListener('click', () => {
+                database.ref('leaderboard').remove().then(() => {
+                    updateLeaderboard();
+                });
+            });
 
             // Update leaderboard on page load
             updateLeaderboard();
