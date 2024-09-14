@@ -54,7 +54,7 @@
         }
 
         /* Hide audio controls */
-        .audio-player {
+        audio {
             display: none;
         }
     </style>
@@ -63,13 +63,17 @@
     <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
     
     <!-- Background Music -->
-    <audio class="audio-player" autoplay loop>
+    <audio autoplay loop>
         <source src="song.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
 
     <div class="counter" id="counter">
-        You have been watching this banana groove for <span id="days">0</span> days <span id="hours">0</span> hours <span id="minutes">0</span> minutes <span id="seconds">0</span> seconds
+        You have been watching this banana groove for 
+        <span id="days">0</span> <span id="day-label">days</span> 
+        <span id="hours">0</span> <span id="hour-label">hours</span> 
+        <span id="minutes">0</span> <span id="minute-label">minutes</span> 
+        <span id="seconds">0</span> seconds
     </div>
 
     <script>
@@ -96,10 +100,16 @@
                 const elapsed = now - startTime; // Time in milliseconds
                 const { days, hours, minutes, seconds } = formatTime(elapsed);
                 
+                // Update counter values
                 document.getElementById('days').textContent = days;
                 document.getElementById('hours').textContent = hours;
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
+
+                // Update labels based on values
+                document.getElementById('day-label').textContent = days === 1 ? 'day' : 'days';
+                document.getElementById('hour-label').textContent = hours === 1 ? 'hour' : 'hours';
+                document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
             }
 
             // Update the counter every second
