@@ -98,20 +98,6 @@
             margin-bottom: 5px;
         }
 
-        .reset-button {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1em;
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 10;
-        }
-
         audio {
             display: none;
         }
@@ -135,7 +121,7 @@
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
         <span id="minutes">0</span> <span id="minute-label">minutes</span> 
-        <span id="seconds">0</span> <span id="second-label">seconds</span>
+        <span id="seconds">0</span> seconds
     </div>
 
     <div class="leaderboard hidden" id="leaderboard">
@@ -145,9 +131,8 @@
         </ul>
     </div>
 
-    <!-- Reset Button -->
-    <button class="reset-button hidden" id="reset-button">Reset Leaderboard</button>
-
+    <!-- Removed Reset Button -->
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
@@ -156,8 +141,7 @@
             const counter = document.getElementById('counter');
             const leaderboard = document.getElementById('leaderboard');
             const leaderboardList = document.getElementById('leaderboard-list');
-            const resetButton = document.getElementById('reset-button');
-            let startTime;
+            const startTime = new Date();
 
             // Function to format time
             function formatTime(ms) {
@@ -185,11 +169,13 @@
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
 
-                // Show or hide labels based on the values
+                document.getElementById('day-label').textContent = days === 1 ? 'day' : 'days';
+                document.getElementById('hour-label').textContent = hours === 1 ? 'hour' : 'hours';
+                document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
+
                 document.getElementById('day-label').style.display = days > 0 ? 'inline' : 'none';
-                document.getElementById('hour-label').style.display = hours > 0 || days > 0 ? 'inline' : 'none';
-                document.getElementById('minute-label').style.display = minutes > 0 || hours > 0 || days > 0 ? 'inline' : 'none';
-                document.getElementById('second-label').style.display = true; // Always show seconds
+                document.getElementById('hour-label').style.display = hours > 0 ? 'inline' : 'none';
+                document.getElementById('minute-label').style.display = minutes > 0 || seconds > 0 ? 'inline' : 'none';
             }
 
             // Show content function
@@ -200,70 +186,45 @@
                 gif.classList.remove('hidden');
                 counter.classList.remove('hidden');
                 leaderboard.classList.remove('hidden');
-                resetButton.classList.remove('hidden');
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
 
-                // Set start time and update the counter every second
-                startTime = new Date();
-                localStorage.setItem('startTime', startTime.toISOString());
+                // Update the counter every second
                 setInterval(updateCounter, 1000);
-                
-                // Update leaderboard
-                updateLeaderboard();
+
+                // Save start time
+                localStorage.setItem('startTime', new Date().toISOString());
             }
 
             // Update leaderboard
             function updateLeaderboard() {
-                const startTimeStr = localStorage.getItem('startTime');
-                if (startTimeStr) {
-                    const startTime = new Date(startTimeStr);
-                    const currentTime = new Date();
-                    const timeOnPage = Math.floor((currentTime - startTime) / 1000);
+                fetch('/leaderboard')
+                    .then(response => response.json())
+                    .then(leaderboardData => {
+                        leaderboardList.innerHTML = '';
+                        leaderboardData.forEach((entry, index) => {
+                            const listItem = document.createElement('li');
+                            const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
+                            let timeString = `${seconds} seconds`;
 
-                    // Load existing leaderboard data
-                    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
+                            if (minutes > 0 || hours > 0 || days > 0) {
+                                timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                            }
+                            if (hours > 0 || days > 0) {
+                                timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                            }
+                            if (days > 0) {
+                                timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                            }
 
-                    // Update leaderboard data
-                    let updatedLeaderboard = [...leaderboardData, { time: timeOnPage }];
-                    updatedLeaderboard = updatedLeaderboard
-                        .sort((a, b) => b.time - a.time)
-                        .slice(0, 3); // Show top 3 only
-
-                    // Save updated leaderboard
-                    localStorage.setItem('leaderboard', JSON.stringify(updatedLeaderboard));
-
-                    // Render leaderboard
-                    leaderboardList.innerHTML = '';
-                    updatedLeaderboard.forEach((entry, index) => {
-                        const listItem = document.createElement('li');
-                        const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
-                        let timeString = `${seconds} seconds`;
-
-                        if (minutes > 0 || hours > 0 || days > 0) {
-                            timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                        }
-                        if (hours > 0 || days > 0) {
-                            timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                        }
-                        if (days > 0) {
-                            timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
-                        }
-
-                        listItem.textContent = `${index + 1}. ${timeString}`;
-                        leaderboardList.appendChild(listItem);
+                            listItem.textContent = `${index + 1}. ${timeString}`;
+                            leaderboardList.appendChild(listItem);
+                        });
                     });
-                }
             }
 
             // Show content on button click
             startButton.addEventListener('click', showContent);
-
-            // Reset leaderboard
-            resetButton.addEventListener('click', () => {
-                localStorage.removeItem('leaderboard');
-                updateLeaderboard();
-            });
 
             // Update leaderboard on page load
             updateLeaderboard();
