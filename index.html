@@ -63,7 +63,7 @@
     <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
     
     <!-- Background Music -->
-    <audio autoplay loop>
+    <audio id="background-music" loop>
         <source src="song.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
@@ -80,6 +80,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             const startTime = new Date();
             
+            // Play audio on page load
+            const audio = document.getElementById('background-music');
+            const playAudio = () => {
+                audio.play().catch(error => {
+                    console.log('Autoplay prevented. User interaction required.');
+                });
+            };
+            playAudio();
+
             // Function to format the time into days, hours, minutes, and seconds
             function formatTime(ms) {
                 const seconds = Math.floor(ms / 1000);
