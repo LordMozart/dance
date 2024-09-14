@@ -135,7 +135,7 @@
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
         <span id="minutes">0</span> <span id="minute-label">minutes</span> 
-        <span id="seconds">0</span> seconds
+        <span id="seconds">0</span> <span id="second-label">seconds</span>
     </div>
 
     <div class="leaderboard hidden" id="leaderboard">
@@ -146,7 +146,7 @@
     </div>
 
     <!-- Reset Button -->
-    <button class="reset-button" id="reset-button">Reset Leaderboard</button>
+    <button class="reset-button hidden" id="reset-button">Reset Leaderboard</button>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -157,7 +157,7 @@
             const leaderboard = document.getElementById('leaderboard');
             const leaderboardList = document.getElementById('leaderboard-list');
             const resetButton = document.getElementById('reset-button');
-            const startTime = new Date();
+            let startTime;
 
             // Function to format time
             function formatTime(ms) {
@@ -185,13 +185,11 @@
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
 
-                document.getElementById('day-label').textContent = days === 1 ? 'day' : 'days';
-                document.getElementById('hour-label').textContent = hours === 1 ? 'hour' : 'hours';
-                document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
-
+                // Show or hide labels based on the values
                 document.getElementById('day-label').style.display = days > 0 ? 'inline' : 'none';
-                document.getElementById('hour-label').style.display = hours > 0 ? 'inline' : 'none';
-                document.getElementById('minute-label').style.display = minutes > 0 || seconds > 0 ? 'inline' : 'none';
+                document.getElementById('hour-label').style.display = hours > 0 || days > 0 ? 'inline' : 'none';
+                document.getElementById('minute-label').style.display = minutes > 0 || hours > 0 || days > 0 ? 'inline' : 'none';
+                document.getElementById('second-label').style.display = true; // Always show seconds
             }
 
             // Show content function
@@ -206,11 +204,13 @@
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
 
-                // Update the counter every second
+                // Set start time and update the counter every second
+                startTime = new Date();
+                localStorage.setItem('startTime', startTime.toISOString());
                 setInterval(updateCounter, 1000);
-
-                // Save start time
-                localStorage.setItem('startTime', new Date().toISOString());
+                
+                // Update leaderboard
+                updateLeaderboard();
             }
 
             // Update leaderboard
