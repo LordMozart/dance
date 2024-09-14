@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rainbow Background with Centered GIF</title>
-    <link rel="icon" type="image/x-icon" href="https://static.wikia.nocookie.net/ensemble-dark-horse/images/e/e2/DancingBanana.gif/revision/latest?cb=20230716030203">
     <style>
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden; /* Prevent scrollbars */
-            position: relative; /* For positioning the GIF and audio player */
+            position: relative; /* For positioning the GIF, audio player, and counter */
         }
 
         body {
@@ -40,21 +39,57 @@
             z-index: 1; /* Ensure the GIF is on top of the background */
         }
 
-        /* Style for the audio player */
         .audio-player {
             position: absolute;
             bottom: 20px; /* Distance from the bottom */
             right: 20px;  /* Distance from the right */
             z-index: 2; /* Ensure it is above the background */
         }
+
+        .counter {
+            position: absolute;
+            top: 20px; /* Distance from the top */
+            left: 50%;
+            transform: translateX(-50%); /* Center horizontally */
+            color: white;
+            font-size: 1.2em;
+            z-index: 2; /* Ensure it is above the background */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for readability */
+            padding: 10px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
     
-    <audio class="audio-player" controls>
-        <source src="song.mp3" type="audio/mp3">
+    <audio class="audio-player" controls autoplay loop>
+        <source src="song.mp4" type="audio/mp4">
         Your browser does not support the audio element.
     </audio>
+
+    <div class="counter" id="counter">
+        You have been dancing for <span id="days">0</span> days <span id="hours">0</span> hours <span id="minutes">0</span> minutes <span id="seconds">0</span> seconds
+    </div>
+
+    <script>
+        function updateCounter() {
+            const startTime = new Date();
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 1000); // Time in seconds
+            
+            const days = Math.floor(elapsed / (60 * 60 * 24));
+            const hours = Math.floor((elapsed % (60 * 60 * 24)) / (60 * 60));
+            const minutes = Math.floor((elapsed % (60 * 60)) / 60);
+            const seconds = elapsed % 60;
+
+            document.getElementById('days').textContent = days > 0 ? days : '';
+            document.getElementById('hours').textContent = hours > 0 || days > 0 ? hours : '';
+            document.getElementById('minutes').textContent = minutes > 0 || hours > 0 || days > 0 ? minutes : '';
+            document.getElementById('seconds').textContent = seconds > 0 || minutes > 0 || hours > 0 || days > 0 ? seconds : '';
+        }
+
+        setInterval(updateCounter, 1000); // Update counter every second
+    </script>
 </body>
 </html>
