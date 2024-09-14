@@ -76,9 +76,9 @@
 
         .leaderboard {
             position: absolute;
-            top: 80px; /* Adjust as needed */
-            left: 50%;
-            transform: translateX(-50%);
+            top: 20px; /* Adjust as needed */
+            right: 20px;
+            width: 250px; /* Adjust width as needed */
             color: white;
             font-size: 1em;
             z-index: 2;
@@ -194,7 +194,7 @@
 
                 // Update leaderboard data
                 let updatedLeaderboard = [...leaderboardData, userEntry];
-                updatedLeaderboard = updatedLeaderboard.sort((a, b) => b.time - a.time).slice(0, 5);
+                updatedLeaderboard = updatedLeaderboard.sort((a, b) => b.time - a.time).slice(0, 10);
 
                 // Save updated leaderboard
                 localStorage.setItem('leaderboard', JSON.stringify(updatedLeaderboard));
