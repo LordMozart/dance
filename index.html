@@ -1,16 +1,15 @@
-<div class="banana"></div>  
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbow Background</title>
+    <title>Rainbow Background with Centered GIF</title>
     <style>
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden; /* Prevent scrollbars */
+            position: relative; /* For positioning the GIF */
         }
 
         body {
@@ -31,8 +30,17 @@
             50% { background-position: 100% 100%; }
             100% { background-position: 0% 0%; }
         }
+
+        .centered-gif {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the GIF */
+            z-index: 1; /* Ensure the GIF is on top of the background */
+        }
     </style>
 </head>
 <body>
+    <img src="https://i.pinimg.com/originals/e8/6a/d3/e86ad38ec43f8d28a608259275fe9b31.gif" alt="Centered GIF" class="centered-gif">
 </body>
 </html>
