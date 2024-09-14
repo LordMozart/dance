@@ -8,69 +8,35 @@
     width: 198px;
     height: 210px;
     background-image: url("https://i.cloudup.com/q3ZLPB9kVH.png");
-    background-size: cover;
     
-    /* Animation for the sprite background */
-    -webkit-animation: play 0.8s steps(8) infinite, colorChange 10s infinite;
-       -moz-animation: play 0.8s steps(8) infinite, colorChange 10s infinite;
-        -ms-animation: play 0.8s steps(8) infinite, colorChange 10s infinite;
-         -o-animation: play 0.8s steps(8) infinite, colorChange 10s infinite;
-            animation: play 0.8s steps(8) infinite, colorChange 10s infinite;
+    -webkit-animation: play .8s steps(8) infinite;
+       -moz-animation: play .8s steps(8) infinite;
+        -ms-animation: play .8s steps(8) infinite;
+         -o-animation: play .8s steps(8) infinite;
+            animation: play .8s steps(8) infinite;
 }
 
-/* Keyframes for the sprite background animation */
 @-webkit-keyframes play {
-   from { background-position: 0px; }
+   from { background-position:    0px; }
      to { background-position: -1584px; }
 }
 
 @-moz-keyframes play {
-   from { background-position: 0px; }
+   from { background-position:    0px; }
      to { background-position: -1584px; }
 }
 
 @-ms-keyframes play {
-   from { background-position: 0px; }
+   from { background-position:    0px; }
      to { background-position: -1584px; }
 }
 
 @-o-keyframes play {
-   from { background-position: 0px; }
+   from { background-position:    0px; }
      to { background-position: -1584px; }
 }
 
 @keyframes play {
-   from { background-position: 0px; }
+   from { background-position:    0px; }
      to { background-position: -1584px; }
-}
-
-/* Keyframes for the background color animation */
-@-webkit-keyframes colorChange {
-    0% { background-color: #FFDDC1; }
-   50% { background-color: #FFABAB; }
-  100% { background-color: #FFDDC1; }
-}
-
-@-moz-keyframes colorChange {
-    0% { background-color: #FFDDC1; }
-   50% { background-color: #FFABAB; }
-  100% { background-color: #FFDDC1; }
-}
-
-@-ms-keyframes colorChange {
-    0% { background-color: #FFDDC1; }
-   50% { background-color: #FFABAB; }
-  100% { background-color: #FFDDC1; }
-}
-
-@-o-keyframes colorChange {
-    0% { background-color: #FFDDC1; }
-   50% { background-color: #FFABAB; }
-  100% { background-color: #FFDDC1; }
-}
-
-@keyframes colorChange {
-    0% { background-color: #FFDDC1; }
-   50% { background-color: #FFABAB; }
-  100% { background-color: #FFDDC1; }
 }
