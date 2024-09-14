@@ -238,19 +238,19 @@
                     updatedLeaderboard.forEach((entry, index) => {
                         const listItem = document.createElement('li');
                         const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
-                        let timeString = ${seconds} seconds;
+                        let timeString = `${seconds} seconds`;
 
                         if (minutes > 0 || hours > 0 || days > 0) {
-                            timeString = ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds;
+                            timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
                         }
                         if (hours > 0 || days > 0) {
-                            timeString = ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds;
+                            timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
                         }
                         if (days > 0) {
-                            timeString = ${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds;
+                            timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
                         }
 
-                        listItem.textContent = ${index + 1}. ${timeString};
+                        listItem.textContent = `${index + 1}. ${timeString}`;
                         leaderboardList.appendChild(listItem);
                     });
                 }
