@@ -76,9 +76,9 @@
 
         .leaderboard {
             position: absolute;
-            top: 20px; /* Adjust as needed */
+            top: 20px;
             right: 20px;
-            width: 250px; /* Adjust width as needed */
+            width: 250px;
             color: white;
             font-size: 1em;
             z-index: 2;
@@ -131,9 +131,7 @@
             const leaderboardList = document.getElementById('leaderboard-list');
             const startTime = new Date();
 
-            // Load leaderboard from localStorage
-            const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
-
+            // Function to format time
             function formatTime(ms) {
                 const seconds = Math.floor(ms / 1000);
                 const days = Math.floor(seconds / 86400);
@@ -148,6 +146,7 @@
                 };
             }
 
+            // Update the counter
             function updateCounter() {
                 const now = new Date();
                 const elapsed = now - startTime; // Time in milliseconds
@@ -163,12 +162,11 @@
                 document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
             }
 
+            // Show content function
             function showContent() {
-                // Start playing audio
                 const audio = document.getElementById('background-music');
                 audio.play();
                 
-                // Reveal content
                 gif.classList.remove('hidden');
                 counter.classList.remove('hidden');
                 leaderboard.classList.remove('hidden');
@@ -178,43 +176,49 @@
                 // Update the counter every second
                 setInterval(updateCounter, 1000);
 
-                // Update the leaderboard
-                updateLeaderboard();
+                // Save start time
+                localStorage.setItem('startTime', new Date().toISOString());
             }
 
+            // Update leaderboard on page load
             function updateLeaderboard() {
-                // Get current user time
-                const userTime = localStorage.getItem('userTime');
-                const currentTime = new Date();
-                const timeOnPage = Math.floor((currentTime - new Date(userTime)) / 1000);
-                const userEntry = {
-                    name: 'You',
-                    time: timeOnPage
-                };
+                const startTimeStr = localStorage.getItem('startTime');
+                if (startTimeStr) {
+                    const startTime = new Date(startTimeStr);
+                    const currentTime = new Date();
+                    const timeOnPage = Math.floor((currentTime - startTime) / 1000);
 
-                // Update leaderboard data
-                let updatedLeaderboard = [...leaderboardData, userEntry];
-                updatedLeaderboard = updatedLeaderboard.sort((a, b) => b.time - a.time).slice(0, 10);
+                    // Load existing leaderboard data
+                    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
-                // Save updated leaderboard
-                localStorage.setItem('leaderboard', JSON.stringify(updatedLeaderboard));
+                    // Update leaderboard data
+                    let updatedLeaderboard = [...leaderboardData, { time: timeOnPage }];
+                    updatedLeaderboard = updatedLeaderboard
+                        .sort((a, b) => b.time - a.time)
+                        .slice(0, 10);
 
-                // Render leaderboard
-                leaderboardList.innerHTML = '';
-                updatedLeaderboard.forEach(entry => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${entry.name}: ${formatTime(entry.time).days} days ${formatTime(entry.time).hours} hours ${formatTime(entry.time).minutes} minutes ${formatTime(entry.time).seconds} seconds`;
-                    leaderboardList.appendChild(listItem);
-                });
+                    // Save updated leaderboard
+                    localStorage.setItem('leaderboard', JSON.stringify(updatedLeaderboard));
+
+                    // Render leaderboard
+                    leaderboardList.innerHTML = '';
+                    updatedLeaderboard.forEach((entry, index) => {
+                        const listItem = document.createElement('li');
+                        const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
+                        listItem.textContent = `${index + 1}. ${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        leaderboardList.appendChild(listItem);
+                    });
+                }
             }
 
-            // Set up button click event
+            // Button click event
             startButton.addEventListener('click', () => {
                 showContent();
-
-                // Save start time for the user
-                localStorage.setItem('userTime', new Date().toISOString());
+                updateLeaderboard();
             });
+
+            // Update leaderboard only on page load
+            updateLeaderboard();
         });
     </script>
 </body>
