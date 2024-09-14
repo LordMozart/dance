@@ -65,7 +65,7 @@
     <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
     
     <audio class="audio-player" controls autoplay loop>
-        <source src="song.mp3" type="audio/mp4">
+        <source src="song.mp4" type="audio/mp4">
         Your browser does not support the audio element.
     </audio>
 
@@ -74,32 +74,33 @@
     </div>
 
     <script>
-        function updateCounter() {
+        document.addEventListener('DOMContentLoaded', () => {
+            const audio = document.querySelector('.audio-player');
             const startTime = new Date();
-            const audioStartTime = new Date(); // Time when audio starts playing
-
+            
+            // Function to format the time into minutes and seconds
             function formatTime(ms) {
                 const seconds = Math.floor(ms / 1000);
                 const minutes = Math.floor(seconds / 60);
                 const remainingSeconds = seconds % 60;
-
                 return {
-                    minutes: minutes > 0 ? minutes : null,
-                    seconds: remainingSeconds > 0 ? remainingSeconds : null
+                    minutes: minutes,
+                    seconds: remainingSeconds
                 };
             }
 
-            setInterval(() => {
+            function updateCounter() {
                 const now = new Date();
-                const elapsed = now - audioStartTime; // Time in milliseconds
+                const elapsed = now - startTime; // Time in milliseconds
                 const { minutes, seconds } = formatTime(elapsed);
+                
+                document.getElementById('minutes').textContent = minutes;
+                document.getElementById('seconds').textContent = seconds;
+            }
 
-                document.getElementById('minutes').textContent = minutes !== null ? minutes : '';
-                document.getElementById('seconds').textContent = seconds !== null ? seconds : '';
-            }, 1000); // Update counter every second
-        }
-
-        updateCounter(); // Start the counter update
+            // Update the counter every second
+            setInterval(updateCounter, 1000);
+        });
     </script>
 </body>
 </html>
