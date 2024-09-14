@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbow Background with Centered GIF</title>
+    <title>Rainbow Background with Centered GIF and Live Counter</title>
     <style>
         html, body {
             height: 100%;
@@ -57,6 +57,7 @@
             background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for readability */
             padding: 10px;
             border-radius: 8px;
+            text-align: center;
         }
     </style>
 </head>
@@ -69,27 +70,36 @@
     </audio>
 
     <div class="counter" id="counter">
-        You have been dancing for <span id="days">0</span> days <span id="hours">0</span> hours <span id="minutes">0</span> minutes <span id="seconds">0</span> seconds
+        You have been listening to this banana for <span id="minutes">0</span> minutes <span id="seconds">0</span> seconds
     </div>
 
     <script>
         function updateCounter() {
             const startTime = new Date();
-            const now = new Date();
-            const elapsed = Math.floor((now - startTime) / 1000); // Time in seconds
-            
-            const days = Math.floor(elapsed / (60 * 60 * 24));
-            const hours = Math.floor((elapsed % (60 * 60 * 24)) / (60 * 60));
-            const minutes = Math.floor((elapsed % (60 * 60)) / 60);
-            const seconds = elapsed % 60;
+            const audioStartTime = new Date(); // Time when audio starts playing
 
-            document.getElementById('days').textContent = days > 0 ? days : '';
-            document.getElementById('hours').textContent = hours > 0 || days > 0 ? hours : '';
-            document.getElementById('minutes').textContent = minutes > 0 || hours > 0 || days > 0 ? minutes : '';
-            document.getElementById('seconds').textContent = seconds > 0 || minutes > 0 || hours > 0 || days > 0 ? seconds : '';
+            function formatTime(ms) {
+                const seconds = Math.floor(ms / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+
+                return {
+                    minutes: minutes > 0 ? minutes : null,
+                    seconds: remainingSeconds > 0 ? remainingSeconds : null
+                };
+            }
+
+            setInterval(() => {
+                const now = new Date();
+                const elapsed = now - audioStartTime; // Time in milliseconds
+                const { minutes, seconds } = formatTime(elapsed);
+
+                document.getElementById('minutes').textContent = minutes !== null ? minutes : '';
+                document.getElementById('seconds').textContent = seconds !== null ? seconds : '';
+            }, 1000); // Update counter every second
         }
 
-        setInterval(updateCounter, 1000); // Update counter every second
+        updateCounter(); // Start the counter update
     </script>
 </body>
 </html>
