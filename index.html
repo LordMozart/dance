@@ -4,16 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banana Groove</title>
-    <script src="script.js" defer></script>
     <style>
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden; /* Prevent scrollbars */
             position: relative; /* For positioning the GIF and counter */
+            background: #1c1c1c; /* Default background color */
+            color: white;
         }
 
-        body {
+        /* Hidden elements */
+        .hidden {
+            display: none;
+        }
+
+        .centered-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the button */
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 10; /* Ensure the button is above other content */
+        }
+
+        body.show-content .centered-button {
+            display: none;
+        }
+
+        body.show-content {
             background: linear-gradient(45deg, 
                 red, 
                 orange, 
@@ -61,15 +86,19 @@
     </style>
 </head>
 <body>
-    <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
+    <!-- Start Button -->
+    <button class="centered-button" id="start-button">Click Here</button>
+    
+    <!-- Hidden Content -->
+    <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif hidden">
     
     <!-- Background Music -->
-    <audio id="background-music" loop>
+    <audio id="background-music" autoplay loop>
         <source src="song.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
 
-    <div class="counter" id="counter">
+    <div class="counter hidden" id="counter">
         You have been watching this banana groove for 
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
@@ -79,18 +108,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.getElementById('start-button');
+            const body = document.body;
+            const gif = document.querySelector('.centered-gif');
+            const counter = document.getElementById('counter');
             const startTime = new Date();
-            
-            // Play audio on page load
-            const audio = document.getElementById('background-music');
-            const playAudio = () => {
-                audio.play().catch(error => {
-                    console.log('Autoplay prevented. User interaction required.');
-                });
-            };
-            playAudio();
 
-            // Function to format the time into days, hours, minutes, and seconds
             function formatTime(ms) {
                 const seconds = Math.floor(ms / 1000);
                 const days = Math.floor(seconds / 86400);
@@ -110,20 +133,33 @@
                 const elapsed = now - startTime; // Time in milliseconds
                 const { days, hours, minutes, seconds } = formatTime(elapsed);
                 
-                // Update counter values
                 document.getElementById('days').textContent = days;
                 document.getElementById('hours').textContent = hours;
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
 
-                // Update labels based on values
                 document.getElementById('day-label').textContent = days === 1 ? 'day' : 'days';
                 document.getElementById('hour-label').textContent = hours === 1 ? 'hour' : 'hours';
                 document.getElementById('minute-label').textContent = minutes === 1 ? 'minute' : 'minutes';
             }
 
-            // Update the counter every second
-            setInterval(updateCounter, 1000);
+            function showContent() {
+                // Start playing audio
+                const audio = document.getElementById('background-music');
+                audio.play();
+                
+                // Reveal content
+                gif.classList.remove('hidden');
+                counter.classList.remove('hidden');
+                body.classList.add('show-content');
+                startButton.style.display = 'none';
+
+                // Update the counter every second
+                setInterval(updateCounter, 1000);
+            }
+
+            // Set up button click event
+            startButton.addEventListener('click', showContent);
         });
     </script>
 </body>
