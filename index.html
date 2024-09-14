@@ -9,7 +9,7 @@
             height: 100%;
             margin: 0;
             overflow: hidden; /* Prevent scrollbars */
-            position: relative; /* For positioning the GIF */
+            position: relative; /* For positioning the GIF and audio player */
         }
 
         body {
@@ -38,9 +38,22 @@
             transform: translate(-50%, -50%); /* Center the GIF */
             z-index: 1; /* Ensure the GIF is on top of the background */
         }
+
+        /* Style for the audio player */
+        .audio-player {
+            position: absolute;
+            bottom: 20px; /* Distance from the bottom */
+            right: 20px;  /* Distance from the right */
+            z-index: 2; /* Ensure it is above the background */
+        }
     </style>
 </head>
 <body>
     <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
+    
+    <audio class="audio-player" controls>
+        <source src="song.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
 </body>
 </html>
