@@ -8,13 +8,12 @@
         html, body {
             height: 100%;
             margin: 0;
-            overflow: hidden; /* Prevent scrollbars */
-            position: relative; /* For positioning the GIF and counter */
-            background: #1c1c1c; /* Default background color */
+            overflow: hidden;
+            position: relative;
+            background: #1c1c1c;
             color: white;
         }
 
-        /* Hidden elements */
         .hidden {
             display: none;
         }
@@ -23,7 +22,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* Center the button */
+            transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
@@ -31,11 +30,7 @@
             font-size: 1.2em;
             border-radius: 8px;
             cursor: pointer;
-            z-index: 10; /* Ensure the button is above other content */
-        }
-
-        body.show-content .centered-button {
-            display: none;
+            z-index: 10;
         }
 
         body.show-content {
@@ -47,8 +42,8 @@
                 blue, 
                 indigo, 
                 violet);
-            background-size: 600% 600%; /* Size of the gradient */
-            animation: rainbow 10s ease infinite; /* Animation for the rainbow effect */
+            background-size: 600% 600%;
+            animation: rainbow 10s ease infinite;
         }
 
         @keyframes rainbow {
@@ -61,25 +56,38 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* Center the GIF */
-            z-index: 1; /* Ensure the GIF is on top of the background */
+            transform: translate(-50%, -50%);
+            z-index: 1;
         }
 
         .counter {
             position: absolute;
-            top: 20px; /* Distance from the top */
+            top: 20px;
             left: 50%;
-            transform: translateX(-50%); /* Center horizontally */
+            transform: translateX(-50%);
             color: white;
             font-size: 1.2em;
-            z-index: 2; /* Ensure it is above the background */
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for readability */
+            z-index: 2;
+            background-color: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 8px;
             text-align: center;
         }
 
-        /* Hide audio controls */
+        .leaderboard {
+            position: absolute;
+            top: 80px; /* Adjust as needed */
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1em;
+            z-index: 2;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
         audio {
             display: none;
         }
@@ -106,13 +114,25 @@
         <span id="seconds">0</span> seconds
     </div>
 
+    <div class="leaderboard hidden" id="leaderboard">
+        <h2>Leaderboard</h2>
+        <ul id="leaderboard-list">
+            <!-- Leaderboard entries will be inserted here -->
+        </ul>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
             const body = document.body;
             const gif = document.querySelector('.centered-gif');
             const counter = document.getElementById('counter');
+            const leaderboard = document.getElementById('leaderboard');
+            const leaderboardList = document.getElementById('leaderboard-list');
             const startTime = new Date();
+
+            // Load leaderboard from localStorage
+            const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
             function formatTime(ms) {
                 const seconds = Math.floor(ms / 1000);
@@ -151,15 +171,50 @@
                 // Reveal content
                 gif.classList.remove('hidden');
                 counter.classList.remove('hidden');
+                leaderboard.classList.remove('hidden');
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
 
                 // Update the counter every second
                 setInterval(updateCounter, 1000);
+
+                // Update the leaderboard
+                updateLeaderboard();
+            }
+
+            function updateLeaderboard() {
+                // Get current user time
+                const userTime = localStorage.getItem('userTime');
+                const currentTime = new Date();
+                const timeOnPage = Math.floor((currentTime - new Date(userTime)) / 1000);
+                const userEntry = {
+                    name: 'You',
+                    time: timeOnPage
+                };
+
+                // Update leaderboard data
+                let updatedLeaderboard = [...leaderboardData, userEntry];
+                updatedLeaderboard = updatedLeaderboard.sort((a, b) => b.time - a.time).slice(0, 5);
+
+                // Save updated leaderboard
+                localStorage.setItem('leaderboard', JSON.stringify(updatedLeaderboard));
+
+                // Render leaderboard
+                leaderboardList.innerHTML = '';
+                updatedLeaderboard.forEach(entry => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${entry.name}: ${formatTime(entry.time).days} days ${formatTime(entry.time).hours} hours ${formatTime(entry.time).minutes} minutes ${formatTime(entry.time).seconds} seconds`;
+                    leaderboardList.appendChild(listItem);
+                });
             }
 
             // Set up button click event
-            startButton.addEventListener('click', showContent);
+            startButton.addEventListener('click', () => {
+                showContent();
+
+                // Save start time for the user
+                localStorage.setItem('userTime', new Date().toISOString());
+            });
         });
     </script>
 </body>
