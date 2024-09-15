@@ -105,8 +105,25 @@
             margin-bottom: 5px;
         }
 
-        /* Removed the reset-button CSS */
-        
+        /* New CSS for the clickable image */
+        .github-link {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .github-link img {
+            width: 50px; /* Adjust size as needed */
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .github-link img:hover {
+            transform: scale(1.1);
+        }
+
         audio {
             display: none;
         }
@@ -139,6 +156,11 @@
             <!-- Leaderboard entries will be inserted here -->
         </ul>
     </div>
+
+    <!-- Clickable GitHub Image -->
+    <a href="https://github.com/LordMozart" target="_blank" class="github-link">
+        <img src="https://i.pinimg.com/originals/62/59/a9/6259a9e2bcd1999d56211f299e99dcad.png" alt="GitHub">
+    </a>
 
     <!-- Removed the Reset Button -->
     
