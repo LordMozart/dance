@@ -63,7 +63,8 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1;
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease-in-out;
+            display: none; /* Initially hidden */
         }
 
         .counter {
@@ -79,6 +80,7 @@
             border-radius: 8px;
             text-align: center;
             font-family: 'Roboto', sans-serif;
+            display: none; /* Initially hidden */
         }
 
         .leaderboard {
@@ -94,6 +96,7 @@
             border-radius: 8px;
             text-align: center;
             font-family: 'Roboto', sans-serif;
+            display: none; /* Initially hidden */
         }
 
         .leaderboard ul {
@@ -105,7 +108,7 @@
         .leaderboard li {
             margin-bottom: 5px;
         }
-        
+
         audio {
             display: none;
         }
@@ -116,7 +119,7 @@
     <button class="centered-button" id="start-button">Click Here</button>
     
     <!-- Hidden Content -->
-    <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif hidden" id="banana-gif">
+    <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
     
     <!-- Background Music -->
     <audio id="background-music" autoplay loop>
@@ -124,7 +127,7 @@
         Your browser does not support the audio element.
     </audio>
 
-    <div class="counter hidden" id="counter">
+    <div class="counter" id="counter">
         You have been watching this banana groove for: 
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
@@ -132,56 +135,149 @@
         <span id="seconds">0</span> <span id="second-label">seconds</span>
     </div>
 
-    <div class="leaderboard hidden" id="leaderboard">
+    <div class="leaderboard" id="leaderboard">
         <h2>Leaderboard</h2>
-        <ul id="leaderboard-list"></ul>
+        <ul id="leaderboard-list">
+            <!-- Leaderboard entries will be inserted here -->
+        </ul>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
-            const gif = document.getElementById('banana-gif');
-            const audioElement = document.getElementById('background-music');
+            const body = document.body;
+            const gif = document.querySelector('.centered-gif');
+            const counter = document.getElementById('counter');
+            const leaderboard = document.getElementById('leaderboard');
+            const leaderboardList = document.getElementById('leaderboard-list');
+            const audio = document.getElementById('background-music');
+            let startTime;
 
-            let audioContext, analyzer, source, dataArray;
+            // Web Audio API setup
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
 
-            // Function to start audio analysis
-            function startAudioAnalysis() {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyzer = audioContext.createAnalyser();
-                source = audioContext.createMediaElementSource(audioElement);
-                source.connect(analyzer);
-                analyzer.connect(audioContext.destination);
-                analyzer.fftSize = 256;
-
-                const bufferLength = analyzer.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-
-                // Call function to animate banana GIF based on volume
-                animateBanana();
+            // Function to format time
+            function formatTime(ms) {
+                const seconds = Math.floor(ms / 1000);
+                const days = Math.floor(seconds / 86400);
+                const hours = Math.floor((seconds % 86400) / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const remainingSeconds = seconds % 60;
+                return {
+                    days: days,
+                    hours: hours,
+                    minutes: minutes,
+                    seconds: remainingSeconds
+                };
             }
 
-            // Function to animate banana GIF
-            function animateBanana() {
-                analyzer.getByteFrequencyData(dataArray);
+            // Update the counter
+            function updateCounter() {
+                const now = new Date();
+                const elapsed = now - startTime; // Time in milliseconds
+                const { days, hours, minutes, seconds } = formatTime(elapsed);
                 
-                // Get average volume
-                const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                document.getElementById('days').textContent = days;
+                document.getElementById('hours').textContent = hours;
+                document.getElementById('minutes').textContent = minutes;
+                document.getElementById('seconds').textContent = seconds;
 
-                // Scale the GIF based on volume (20% max scaling)
-                const scaleFactor = 1 + (volume / 256) * 0.2;
-                gif.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
-
-                requestAnimationFrame(animateBanana);
+                // Show or hide labels based on the values
+                document.getElementById('day-label').style.display = days > 0 ? 'inline' : 'none';
+                document.getElementById('hour-label').style.display = hours > 0 || days > 0 ? 'inline' : 'none';
+                document.getElementById('minute-label').style.display = minutes > 0 || hours > 0 || days > 0 ? 'inline' : 'none';
+                document.getElementById('second-label').style.display = true; // Always show seconds
             }
 
-            // Show content and start animation when button is clicked
-            startButton.addEventListener('click', () => {
-                gif.classList.remove('hidden');
-                audioElement.play();
-                startAudioAnalysis(); // Start audio analysis after button click
+            // Show content function
+            function showContent() {
+                audio.play();
+                
+                // Show content
+                gif.style.display = 'block';
+                counter.style.display = 'block';
+                leaderboard.style.display = 'block';
+                body.classList.add('show-content');
                 startButton.style.display = 'none';
-            });
+
+                // Set start time and update the counter every second
+                startTime = new Date();
+                localStorage.setItem('startTime', startTime.toISOString());
+                setInterval(updateCounter, 1000);
+                
+                // Update leaderboard
+                updateLeaderboard();
+
+                // Start the volume-based GIF resizing
+                requestAnimationFrame(animateGif);
+            }
+
+            // Update leaderboard
+            function updateLeaderboard() {
+                const startTimeStr = localStorage.getItem('startTime');
+                if (startTimeStr) {
+                    const startTime = new Date(startTimeStr);
+                    const currentTime = new Date();
+                    const timeOnPage = Math.floor((currentTime - startTime) / 1000);
+
+                    // Load existing leaderboard data
+                    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+                    // Update leaderboard data
+                    let updatedLeaderboard = [...leaderboardData, { time: timeOnPage }];
+                    updatedLeaderboard = updatedLeaderboard
+                        .filter(entry => entry.time >= 10) // Remove entries below 10 seconds
+                        .sort((a, b) => b.time - a.time)
+                        .slice(0, 10); // Show top 10 only
+
+                    // Save updated leaderboard
+                    localStorage.setItem('leaderboard', JSON.stringify(updatedLeaderboard));
+
+                    // Render leaderboard
+                    leaderboardList.innerHTML = '';
+                    updatedLeaderboard.forEach((entry, index) => {
+                        const listItem = document.createElement('li');
+                        const { days, hours, minutes, seconds } = formatTime(entry.time * 1000);
+                        let timeString = `${seconds} seconds`;
+
+                        if (minutes > 0 || hours > 0 || days > 0) {
+                            timeString = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        }
+                        if (hours > 0 || days > 0) {
+                            timeString = `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        }
+                        if (days > 0) {
+                            timeString = `${days} ${days === 1 ? 'day' : 'days'} ${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} seconds`;
+                        }
+
+                        listItem.textContent = `${index + 1}. ${timeString}`;
+                        leaderboardList.appendChild(listItem);
+                    });
+                }
+            }
+
+            // Animate GIF based on audio volume
+            function animateGif() {
+                analyser.getByteFrequencyData(dataArray);
+                const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                const scale = 1 + (averageVolume / 255) * 0.2; // Scale from 1 to 1.2
+                gif.style.transform = `translate(-50%, -50%) scale(${scale})`;
+
+                requestAnimationFrame(animateGif);
+            }
+
+            // Show content on button click
+            startButton.addEventListener('click', showContent);
+
+            // Update leaderboard on page load
+            updateLeaderboard();
         });
     </script>
 </body>
