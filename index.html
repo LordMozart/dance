@@ -63,8 +63,6 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1;
-            transition: transform 0.1s ease-in-out;
-            display: none; /* Initially hidden */
         }
 
         .counter {
@@ -80,7 +78,6 @@
             border-radius: 8px;
             text-align: center;
             font-family: 'Roboto', sans-serif;
-            display: none; /* Initially hidden */
         }
 
         .leaderboard {
@@ -96,7 +93,6 @@
             border-radius: 8px;
             text-align: center;
             font-family: 'Roboto', sans-serif;
-            display: none; /* Initially hidden */
         }
 
         .leaderboard ul {
@@ -109,6 +105,8 @@
             margin-bottom: 5px;
         }
 
+        /* Removed the reset-button CSS */
+        
         audio {
             display: none;
         }
@@ -119,15 +117,15 @@
     <button class="centered-button" id="start-button">Click Here</button>
     
     <!-- Hidden Content -->
-    <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
+    <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif hidden">
     
     <!-- Background Music -->
-    <audio id="background-music">
+    <audio id="background-music" autoplay loop>
         <source src="song.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
 
-    <div class="counter" id="counter">
+    <div class="counter hidden" id="counter">
         You have been watching this banana groove for: 
         <span id="days">0</span> <span id="day-label">days</span> 
         <span id="hours">0</span> <span id="hour-label">hours</span> 
@@ -135,13 +133,15 @@
         <span id="seconds">0</span> <span id="second-label">seconds</span>
     </div>
 
-    <div class="leaderboard" id="leaderboard">
+    <div class="leaderboard hidden" id="leaderboard">
         <h2>Leaderboard</h2>
         <ul id="leaderboard-list">
             <!-- Leaderboard entries will be inserted here -->
         </ul>
     </div>
 
+    <!-- Removed the Reset Button -->
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
@@ -150,18 +150,7 @@
             const counter = document.getElementById('counter');
             const leaderboard = document.getElementById('leaderboard');
             const leaderboardList = document.getElementById('leaderboard-list');
-            const audio = document.getElementById('background-music');
             let startTime;
-
-            // Web Audio API setup
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const analyser = audioContext.createAnalyser();
-            const source = audioContext.createMediaElementSource(audio);
-            source.connect(analyser);
-            analyser.connect(audioContext.destination);
-            analyser.fftSize = 256;
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
 
             // Function to format time
             function formatTime(ms) {
@@ -198,18 +187,14 @@
 
             // Show content function
             function showContent() {
-                // Show content
-                gif.style.display = 'block';
-                counter.style.display = 'block';
-                leaderboard.style.display = 'block';
+                const audio = document.getElementById('background-music');
+                audio.play();
+                
+                gif.classList.remove('hidden');
+                counter.classList.remove('hidden');
+                leaderboard.classList.remove('hidden');
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
-
-                // Play background music
-                audio.play().catch(error => {
-                    console.error("Audio playback error:", error);
-                });
-                audio.loop = true;
 
                 // Set start time and update the counter every second
                 startTime = new Date();
@@ -218,9 +203,6 @@
                 
                 // Update leaderboard
                 updateLeaderboard();
-
-                // Start the volume-based GIF resizing
-                requestAnimationFrame(animateGif);
             }
 
             // Update leaderboard
@@ -265,16 +247,6 @@
                         leaderboardList.appendChild(listItem);
                     });
                 }
-            }
-
-            // Animate GIF based on audio volume
-            function animateGif() {
-                analyser.getByteFrequencyData(dataArray);
-                const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
-                const scale = 1 + (averageVolume / 255) * 0.2; // Scale from 1 to 1.2
-                gif.style.transform = `translate(-50%, -50%) scale(${scale})`;
-
-                requestAnimationFrame(animateGif);
             }
 
             // Show content on button click
