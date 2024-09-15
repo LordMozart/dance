@@ -122,7 +122,7 @@
     <img src="https://media.tenor.com/5Ie0r-H6LBAAAAAi/dancing-banana-happy.gif" alt="Centered GIF" class="centered-gif">
     
     <!-- Background Music -->
-    <audio id="background-music" autoplay loop>
+    <audio id="background-music">
         <source src="song.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
@@ -198,14 +198,18 @@
 
             // Show content function
             function showContent() {
-                audio.play();
-                
                 // Show content
                 gif.style.display = 'block';
                 counter.style.display = 'block';
                 leaderboard.style.display = 'block';
                 body.classList.add('show-content');
                 startButton.style.display = 'none';
+
+                // Play background music
+                audio.play().catch(error => {
+                    console.error("Audio playback error:", error);
+                });
+                audio.loop = true;
 
                 // Set start time and update the counter every second
                 startTime = new Date();
