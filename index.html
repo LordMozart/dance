@@ -105,8 +105,17 @@
             margin-bottom: 5px;
         }
 
-        /* Removed the reset-button CSS */
-        
+        /* Mute Button Styles */
+        .mute-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+
         audio {
             display: none;
         }
@@ -140,8 +149,9 @@
         </ul>
     </div>
 
-    <!-- Removed the Reset Button -->
-    
+    <!-- Mute Button (Initially Hidden) -->
+    <img src="unmute-icon.png" alt="Mute Button" class="mute-button hidden" id="mute-button">
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
@@ -150,7 +160,10 @@
             const counter = document.getElementById('counter');
             const leaderboard = document.getElementById('leaderboard');
             const leaderboardList = document.getElementById('leaderboard-list');
+            const muteButton = document.getElementById('mute-button');
+            const audio = document.getElementById('background-music');
             let startTime;
+            let isMuted = false; // Mute state
 
             // Function to format time
             function formatTime(ms) {
@@ -187,7 +200,6 @@
 
             // Show content function
             function showContent() {
-                const audio = document.getElementById('background-music');
                 audio.play();
                 
                 gif.classList.remove('hidden');
@@ -201,8 +213,18 @@
                 localStorage.setItem('startTime', startTime.toISOString());
                 setInterval(updateCounter, 1000);
                 
+                // Show mute button
+                muteButton.classList.remove('hidden');
+                
                 // Update leaderboard
                 updateLeaderboard();
+            }
+
+            // Toggle mute function
+            function toggleMute() {
+                isMuted = !isMuted;
+                audio.muted = isMuted;
+                muteButton.src = isMuted ? 'mute-icon.png' : 'unmute-icon.png'; // Change the icon
             }
 
             // Update leaderboard
@@ -251,6 +273,9 @@
 
             // Show content on button click
             startButton.addEventListener('click', showContent);
+
+            // Toggle mute on mute button click
+            muteButton.addEventListener('click', toggleMute);
 
             // Update leaderboard on page load
             updateLeaderboard();
